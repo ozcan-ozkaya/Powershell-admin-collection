@@ -1,0 +1,15 @@
+1. Run update help for your computer
+
+Update-Help
+
+2. From your computer save help to a shared folder.
+
+Save-Help -destination \\mycomputer\pshelp
+or just use a local folder that you have created
+Save-Help -destination c:\pshelp
+
+3. Update help again from the shared folder for your computer or another computer.
+
+Update-Help -source \\mycomputer\pshelp -force
+
+You might need to force the update if you run these commands all on the same day.

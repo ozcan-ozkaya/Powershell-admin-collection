@@ -1,0 +1,45 @@
+﻿#demo the PowerShell paradigm
+
+#don't expect to understand everything I'm going to show
+
+#cmdlets
+get-command -CommandType cmdlet -ListImported | more
+
+get-command -verb export
+get-command -noun ACL
+
+#a cmdlet in action
+Get-Service
+
+#if you wanted to filter in other languages you would 
+#have to parse text instead we have objects
+
+Get-Service | Get-Member 
+
+#a one line command. No scripting
+Get-Service s* | where {$_.status -eq "running"} | sort displayname | select displayname
+
+#aliases
+dir c:\work
+ls c:\work
+get-alias dir
+
+#help will be covered in more detail in another lesson
+help dir
+
+#customize behavior
+dir c:\work\*.ps1 -file -recurse
+
+#because we have objects we can do interesting things
+dir c:\work -file -recurse | where extension | group extension | Select Name,Count,@Name="Size";Expression={($_.group | measure length -sum).sum}} | Sort Size -Descending | format-table -AutoSize
+
+#variables make it easier to use the shell
+$computers = "chi-dc01","chi-fp01","chi-dc03"
+$os = Get-CimInstance Win32_operatingSystem -ComputerName $computers
+$os | Select Caption,OSArchitecture,InstallDate,LastBootUpTime,@{Name="Uptime";Expression={(Get-Date)-$_.LastBootUpTime}},PSComputername
+
+#read more about it
+help *3.0
+
+cls
+

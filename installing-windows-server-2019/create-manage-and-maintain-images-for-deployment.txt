@@ -1,0 +1,28 @@
+
+## Download WS2019 media and copy to c:\ws2019
+mkdir c:\ws2019dc
+copy c:\ws2019\sources\install.wim c:\ws2019dc
+get-windowsimage -imagepath c:\ws2019dc\install.wim
+remove-windowsimage -imagepath c:\ws2019dc\install.wim -index 1
+## Download Windows updates to c:\staging\updates
+mkdir c:\offline
+mount-windowsimage -imagepath c:\ws2019dc\install.wim -index 1 -path c:\offline
+add-windowspackage -path c:\offline -packagepath c:\staging\updates
+## Unpack drivers and copy to c:\staging\drivers
+add-windowsdriver -path c:\offline -driver c:\staging\drivers -recurse
+## Download App Compat FOD Package from my.visualstudio.com and unpack out of ISO
+Add-WindowsCapability -Path c:\offline -Name ServerCore.AppCompatibility~~~~0.0.1.0 -Source c:\staging\fods
+get-windowsoptionalfeature -path c:\offline
+get-windowsoptionalfeature -path c:\offline | where featurename -like "*directory*"
+get-windowsoptionalfeature -path c:\offline | where featurename -like "*dns*"
+enable-windowsoptionalfeature -path c:\offline -featurename dns-server-full-role -all
+enable-windowsoptionalfeature -path c:\offline -featurename dns-server-tools -all
+enable-windowsoptionalfeature -path c:\offline -featurename directoryservices-domaincontroller-tools -all
+enable-windowsoptionalfeature -path c:\offline -featurename directoryservices-domaincontroller -all
+enable-windowsoptionalfeature -path c:\offline -featurename activedirectory-powershell -all
+dismount-windowsimage -path c:\offline -save
+## Install Windows ADK for Windows 10 onto MYDESKTOP
+## Copy contents of WS2019 ISO into C:\WS2019DC and replace original install.wim with new install.wim
+## Launch "Deployment and Imaging Tools Environment" as admin.
+cd \amd64\oscdimg
+oscdimg -m -o -u2 -udfver102 -bootdata:2#p0,e,betfsboot.com#pEF,e,befisys.bin c:\ws2019dc c:\ws2019custom.iso

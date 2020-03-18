@@ -1,0 +1,23 @@
+set-displayresolution 1280 720
+tzutil /l
+set-timezone "mountain standard time"
+set-date -date "6/12/2019 12:50 PM"
+get-netipaddress -interfacealias ethernet
+New-NetIPAddress -interfacealias ethernet -IPAddress 192.168.3.10 -Prefixlength 24 -defaultgateway 192.168.3.2
+Get-NetIPConfiguration -interfacealias ethernet
+Set-DNSClientServerAddress -interfacealias ethernet -ServerAddress ("192.168.3.10")
+Rename-Computer -newname dc -restart
+
+slmgr.vbs -ipk <productKey>
+slmgr.vbs -ato
+
+Enable-PSRemoting
+
+New-NetFirewallRule -displayname "Allow All Traffic" -direction outbound -action allow
+New-NetFirewallRule -displayname "Allow All Traffic" -direction inbound -action allow
+
+Install-WindowsFeature –Name "AD-Domain-Services" –IncludeManagementTools
+Install-ADDSForest -DomainName "company.pri" -InstallDNS
+
+Add-WindowsCapability -Online -Name ServerCore.AppCompatibility~~~~0.0.1.0
+Get-WindowsCapability -online | where name -like Rsat* | Add-WindowsCapability -Online

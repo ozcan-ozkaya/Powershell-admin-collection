@@ -1,0 +1,34 @@
+﻿1. Get all running processes and save them to a variable called processes.
+
+PS C:\> $processes = Get-Process
+
+2. Write the contents of the processes variable to the pipeline
+
+any of these will work
+PS C:\> $processes
+PS C:\> Write-Output $processes
+PS C:\> write $processes
+PS C:\> $processes | write-output
+
+3. Pipe the processes variable to a text file
+
+this is preferred
+PS C:\> $processes | out-file myprocesses.txt
+
+although this will work as well.
+PS C:\> $processes > myprocesses.txt
+
+4. For each process in your variable, take the workingset property and divide it by 1MB, displaying the result.
+
+You could do it this way using ForEach-Object
+PS C:\> $processes | ForEach {$_.workingset/1MB}
+
+or you could use the ForEach enumerator
+
+PS C:\> foreach ($item in $processes) {$item.workingset/1mb}
+
+5. Where do you think you could learn more about pipelines?
+
+PS C:\> help pipeline
+
+I didn't demonstrate this because you should be using the help system to discover things on your own.

@@ -1,0 +1,29 @@
+﻿#demo v3 console redirection
+
+get-wmiobject win32_logicaldisk -comp "FOO","client2" 2>err.txt
+dir err.txt
+cat err.txt
+
+#or use with scripts
+cat c:\scripts\
+#run this with regular output
+C:\scripts\MyScript.ps1 -Verbose
+#now with redirection
+c:\scripts\myscript.ps1 -verbose 2>err.txt 3>warn.txt 4>verbose.txt
+dir *.txt
+cat err.txt
+cat verb.txt
+cat warn.txt
+
+#merge some streams
+#this works
+c:\scripts\myscript.ps1 2>&1 1>data.txt 
+
+#but this doesn't
+c:\scripts\myscript.ps1 3>&2 2>errwarn.txt
+
+#but this will
+c:\scripts\myscript.ps1 4>&1 1>out.txt 2>err.txt
+
+#you can only merge to the success stream
+#redirection is basic text

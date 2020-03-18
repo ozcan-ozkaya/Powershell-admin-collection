@@ -1,0 +1,15 @@
+help Update-Help -showwindow
+#update all help
+update-help -force
+
+#update for a specific module
+get-module microsoft.powershell* -list | update-help -force
+
+#save help
+help save-help -showwindow
+Save-Help -destination \\chi-fp01\pshelp -force
+
+#run again or on another computer
+Update-help -source \\chi-fp01\pshelp -force
+
+cls

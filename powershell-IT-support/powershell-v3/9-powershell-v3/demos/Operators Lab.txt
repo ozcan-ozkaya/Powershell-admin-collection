@@ -1,0 +1,28 @@
+1. What is 23049564 in megabytes?
+
+PS C:\> 23049564 /1MB
+21.9817771911621
+
+2. Save numbers 1 through 10 as a variable. Test if 77 is in the variable. Then test if the variable contains 5.
+
+PS Scripts:\> $a = 1..10
+PS Scripts:\> $a -contains 77
+False
+PS Scripts:\> 5 -in $a
+True
+
+3. Split the string "alice|bob|carol|david"  on the |. (Hint this is normally a regular expression character)
+
+PS C:\> "alice|bob|carol|david" -split "\|"
+alice
+bob
+carol
+david
+
+You need to escape the regular expression character.
+
+4. How do you think you would write a string of 40 asterisk (*) characters?
+
+PS C:\> "*"*40
+or
+PS C:\> write ("*"*40)

@@ -1,0 +1,21 @@
+1. List currently loaded modules on your computer
+
+PS C:\> get-module
+
+2. List all available modules on your computer
+
+PS C:\> get-module -listavailable
+
+
+3. List all the commands in the Microsoft.PowerShell.Utility module
+
+PS C:\> get-command -module Microsoft.PowerShell.Utility
+
+
+4. Import the Microsoft.PowerShell.Diagnostics module
+
+PS C:\> import-module Microsoft.PowerShell.Diagnostics
+
+or simply use any command in the module, even to get help.
+
+PS C:\> help get-counter

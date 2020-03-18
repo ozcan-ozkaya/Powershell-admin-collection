@@ -1,0 +1,181 @@
+﻿#demo PowerShell Pipeline
+
+#region Pipelining
+
+get-service -name s* 
+get-service -name s* | where {$_.status -eq 'running'} 
+get-service -name s* | where {$_.status -eq 'running'} |
+Restart-Service -whatif
+
+#using variables
+$p = Get-Process
+#this is the same thing as running Get-Process at the previous point in time
+$p
+
+$p | where {$_.workingset -gt 20mb}
+#objects can change in the pipeline
+$p | where {$_.workingset -gt 20mb} | 
+measure-object Workingset -sum -Average
+
+#passthru
+notepad;notepad
+get-process notepad 
+get-process notepad | stop-process | Tee-Object -Variable killed
+$killed
+
+#look at help and see -Passthru
+help stop-process
+
+#let's repeat
+notepad;notepad
+get-process notepad | stop-process -PassThru | 
+Tee-Object -Variable killed
+
+$killed
+
+cls
+#endregion
+
+#region Write-Host vs Write-Output
+
+#these are all equivalent
+write-output Jeff
+write Jeff
+#need quotes here to PowerShell knows this is a string
+"Jeff"
+#But this is hard to tell apart
+Write-Host "Jeff"
+#but it is not written to the pipeline
+write "Jeff" | Get-Member
+Write-Host "Jeff" | Get-Member
+
+#when using Write-Host use a color
+Write-Host "I am logged on as $env:userdomain\$env:username" -ForegroundColor Green
+
+#you generally don't need to explicitly call Write-Output
+
+#sidebar on variable expansion
+$n = "Jeff"
+"I am $n"
+'I am $n'
+"The value of `$n is $n"
+"I am $n on computer $env:computername."
+#this is where it gets tricky
+$s = get-service bits
+$s.DisplayName
+$s.Status
+"The $s.Displayname is $s.status."
+#need a subexpression
+"The $($s.Displayname) is $($s.status)."
+
+cls
+#endregion
+
+#region ForEach-Object
+
+#sometimes you need to do something to an object on an individual basis
+calc;calc;calc
+get-process calc
+#the process object has a CloseMainWindow() method but you can only run 
+#it one at a time
+get-process calc | foreach { 
+ Write-Host "Closing process $($_.id)" -fore Yellow
+ $_.CloseMainWindow()
+ }
+
+#this is ForEach-Object
+dir S:\ -Directory | foreach {
+  $stats = dir $_.FullName -Recurse -File | 
+   Measure-Object length -sum
+  $_ | Select-Object Fullname,
+  @{Name="Size";Expression={$stats.sum}},
+  @{Name="Files";Expression={$stats.count}}
+} | Sort Size 
+
+cls
+#endregion
+
+#region ForEach Enumerator
+
+#filter out processes that don't have a path like System
+$processes = Get-WmiObject Win32_process -filter "executablepath like '%'"
+foreach ($process in $processes) {
+ get-acl $process.executablepath
+ }
+
+#this will fail
+foreach ($process in $processes) {get-acl $process.executablepath} | 
+tee -Variable paths
+
+#but you could do this because each ACL object is written to the pipeline
+$paths = foreach ($process in $processes) { 
+ get-acl $process.executablepath
+ }
+
+$paths
+
+#this is better
+Get-WmiObject win32_process -filter "executablepath like '%'" |
+ select -expandproperty executablepath -unique | get-acl
+
+#but sometimes you really need to use ForEach
+help about_foreach -ShowWindow
+
+$seed="P@ssw0rd"
+$new=""
+foreach ($letter in $seed.ToCharArray()) {
+ $new+=$([int]$letter+1) -as [char]
+ }
+$new
+
+cls
+#endregion
+
+#region stream redirection
+
+#simple redirection
+get-process s* > procs.txt
+get-content procs.txt
+
+#or append
+get-process w* >>procs.txt
+cat procs.txt
+
+#still recommend using Out-File
+
+#redirect other streams
+get-wmiobject win32_logicaldisk -comp "FOO",$env:computername 2>err.txt
+dir err.txt
+cat err.txt
+
+#or use with scripts
+cat S:\myscript.ps1
+#run this with regular output
+S:\MyScript.ps1 -Verbose
+#now with redirection
+S:\myscript.ps1 -verbose 2>err.txt 3>warn.txt 4>verbose.txt
+
+dir err.txt,verbose.txt,warn.txt
+cat err.txt
+cat verbose.txt
+cat warn.txt
+
+#merge some streams
+#this works
+S:\myscript.ps1 2>&1 1>data.txt 
+
+cat data.txt
+
+#but this doesn't
+S:\myscript.ps1 3>&2 2>errwarn.txt
+
+#however this will work. Merge verbose to success
+S:\myscript.ps1 -verbose 4>&1 1>out.txt 2>err.txt
+
+cat out.txt
+
+#you can only merge to the success stream
+
+cls
+
+#endregion

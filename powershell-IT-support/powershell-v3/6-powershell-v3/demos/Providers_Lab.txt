@@ -1,0 +1,20 @@
+1. Create a new PSDrive called TEMP that is mapped to the %TEMP% environmental variable
+
+PS C:\> New-PSDrive -name Temp -psprovider FileSystem -root $env:temp
+
+2. Change to the new drive and recursively list all files and folders
+
+PS C:\> CD Temp:
+(or you could use Set-Location)
+PS C:\> dir -recurse
+
+To remove the psdrive:
+remove-psdrive temp
+
+3. Using the registry find the value for ProductName under HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion
+
+PS C:\> cd 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
+PS C:\> get-itemproperty -path . -Name productname
+
+Or you can do it with a single command
+PS C:\> get-itemproperty -path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name productname
